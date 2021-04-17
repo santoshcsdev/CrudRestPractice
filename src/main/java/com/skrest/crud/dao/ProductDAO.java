@@ -1,7 +1,6 @@
 package com.skrest.crud.dao;
 
-import com.skrest.crud.entity.ProductEntity;
-import com.skrest.crud.model.Product;
+import com.skrest.crud.model.ProductEntity;
 
 import java.util.List;
 
@@ -12,26 +11,25 @@ import java.util.List;
  */
 public interface ProductDAO {
 
-    public boolean addProduct(ProductEntity productEntity);
+    void addProduct(ProductEntity productEntity);
 
-    public boolean addProducts(List<ProductEntity> productEntity);
+    void addProducts(List<ProductEntity> productEntity);
 
-    public Product getProductById(Long productId);
+    ProductEntity getProductById(Long productId);
 
-    public List<Product> getProductByIds(List<Long> productId);
+    List<ProductEntity> getProductByIds(List<Long> productId);
 
-    public boolean updateProduct(ProductEntity productEntity);
+    ProductEntity updateProductById(Long productId, ProductEntity productEntity);
 
-    public boolean updateProducts(List<ProductEntity> productEntity);
+    List<ProductEntity> updateProducts(List<ProductEntity> productEntity);
 
-    public boolean deleteProduct(Long productId);
+    void deleteProduct(Long productId);
 
-    public boolean deleteProducts(List<Long> productId);
+    void deleteProducts(List<Long> productId);
 
-    public long getProductsCount();
+    long getProductsCount();
 
-    public long getProductsCountWithCurrency(String currencyCode);
+    long getProductsCountWithCurrency(String currencyCode);
 
-    public List<Product> getAllProducts();
-
+    List<ProductEntity> getAllProducts();
 }
