@@ -1,4 +1,4 @@
-package com.skrest.crud.dao;
+package com.skrest.crud;
 
 import com.skrest.crud.model.ProductEntity;
 import com.skrest.crud.repository.ProductRepository;
@@ -37,13 +37,25 @@ public class ProductDAOImpl implements ProductDAO{
     }
 
     @Override
-    public void addProduct(ProductEntity productEntity) {
-        productEntity.setId(getNextId());
-        productRepository.insert(productEntity);
+    public boolean addProduct(ProductEntity productEntity) {
+        try {
+            productEntity.setId(getNextId());
+            productRepository.insert(productEntity);
+        }
+        catch (Exception e){
+            LOGGER.error(e.getMessage());
+            throw  e;
+        }
+        return true;
     }
 
     private long getNextId(){
-        return cqlTemplate.queryForObject("SELECT MAX(id) FROM product", Long.class) + 1;
+        try{
+            return cqlTemplate.queryForObject("SELECT MAX(id) FROM product", Long.class) + 1;
+        }
+        catch (NullPointerException ignored){
+        }
+        return 1;
     }
 
     @Override
@@ -58,11 +70,17 @@ public class ProductDAOImpl implements ProductDAO{
 
     @Override
     public void addProducts(List<ProductEntity> productEntityList) {
-        long id = getNextId();
-        for (ProductEntity productEntity : productEntityList) {
-            productEntity.setId(id++);
+        try{
+            long id = getNextId();
+            for (ProductEntity productEntity : productEntityList) {
+                productEntity.setId(id++);
+            }
+            productRepository.insert(productEntityList);
         }
-        productRepository.insert(productEntityList);
+        catch (Exception e){
+            LOGGER.error(e.getMessage());
+            throw  e;
+        }
     }
 
     @Override
@@ -131,13 +149,18 @@ public class ProductDAOImpl implements ProductDAO{
     }
 
     @Override
-    public void deleteProduct(Long productId) {
+    public void deleteProductById(Long productId) {
         // TODO do we need to write try-catch block here??
         productRepository.deleteById(productId);
     }
 
     @Override
-    public void deleteProducts(List<Long> productIds) {
+    public void deleteProduct(ProductEntity productEntity){
+        productRepository.delete(productEntity);
+    }
+
+    @Override
+    public void deleteProductsById(List<Long> productIds) {
         // TODO can write a validate id or valid product helper method.
         List<ProductEntity> productEntityList = new ArrayList<>();
         for(int i = 0; i < productIds.size(); i++){

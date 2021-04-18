@@ -1,6 +1,6 @@
 package com.skrest.crud.controller;
 
-import com.skrest.crud.dao.ProductDAOImpl;
+import com.skrest.crud.ProductDAOImpl;
 import com.skrest.crud.model.ProductEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.ResourceAccessException;
 
 import javax.validation.constraints.Min;
 import java.util.List;
@@ -38,7 +37,7 @@ public class ProductController {
     private static final String FAILURE = "FAILURE";
 
     @GetMapping(value = "/product/{productId}", produces = ("application/json; charset=utf-8"))
-    public ResponseEntity<ProductEntity>  getProductInfo(@PathVariable("productId") @Min(value = 1,message = "wtf") Long productId) throws NoSuchElementException {
+    public ResponseEntity<ProductEntity>  getProductInfo(@PathVariable("productId") @Min(value = 1,message = "wtf") Long productId){
         if(productId == null || productId < 0){
             throw new IllegalArgumentException(environment.getProperty(PRODUCT_NON_NULL_OR_NEGATIVE) + productId);
         }
@@ -125,7 +124,10 @@ public class ProductController {
     public ResponseEntity<String> addProduct(@RequestBody ProductEntity productEntity) throws ResourceNotFoundException {
         checkProductEntity(productEntity);
         try {
-            productDAOImpl.addProduct(productEntity);
+            // TODO do not accept id as input in request body -- handle that case...
+            if(!productDAOImpl.addProduct(productEntity)){
+                throw new ResourceNotFoundException("Unable to add product.");
+            }
         }
         catch (Exception e){
             throw new IllegalArgumentException(String.format("Error in adding the product: %s", e.getMessage()));
@@ -174,11 +176,35 @@ public class ProductController {
             if(productDAOImpl.getProductById(productId) == null){
                 throw new IllegalArgumentException(String.format("No product with id: %d exists.", productId));
             }
-            productDAOImpl.deleteProduct(productId);
+            productDAOImpl.deleteProductById(productId);
         }
         catch (Exception e){
             throw new IllegalArgumentException(String.format("Error in deleting the product with id: %d. %s", productId, e.getMessage()));
         }
+        return new ResponseEntity<>(SUCCESS, HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/product", consumes = ("application/json; charset=utf-8"), produces = ("application/json; charset=utf-8"))
+    public ResponseEntity<String> deleteProduct(@RequestBody ProductEntity productEntity){
+        if(productEntity == null){
+            throw new IllegalArgumentException(environment.getProperty(PRODUCT_NOT_NULL));
+        }
+        if(productEntity.getId() == null || productEntity.getId() < 0){
+            throw new IllegalArgumentException(environment.getProperty(PRODUCT_NON_NULL_OR_NEGATIVE) + productEntity.getId());
+        }
+        if(productDAOImpl.getProductById(productEntity.getId()) == null){
+            throw new NoSuchElementException(environment.getProperty(PRODUCT_NOT_FOUND) + productEntity.getId());
+        }
+        try{
+            productDAOImpl.deleteProduct(productEntity);
+        }
+        catch (ResourceNotFoundException e){
+            throw new ResourceNotFoundException("Product doesn't exist.", e);
+        }
+        catch (Exception e){
+            throw new IllegalArgumentException(String.format("Error in deleting the product: %s", e.getMessage()));
+        }
+
         return new ResponseEntity<>(SUCCESS, HttpStatus.OK);
     }
 
@@ -188,10 +214,10 @@ public class ProductController {
             throw new IllegalArgumentException(environment.getProperty(PRODUCT_LIST_NOT_FOUND));
         }
         try{
-            productDAOImpl.deleteProducts(productIds);
+            productDAOImpl.deleteProductsById(productIds);
         }
         catch (ResourceNotFoundException e){
-            throw new ResourceNotFoundException("Product Id doesnt' exits.", e);
+            throw new ResourceNotFoundException("Product Id doesn't exist.", e);
         }
         catch (Exception e){
             throw new IllegalArgumentException(String.format("Error in deleting the products: %s", e.getMessage()));

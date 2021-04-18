@@ -1,4 +1,4 @@
-package com.skrest.crud.dao;
+package com.skrest.crud;
 
 import com.skrest.crud.model.ProductEntity;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ProductDAO {
 
-    void addProduct(ProductEntity productEntity);
+    boolean addProduct(ProductEntity productEntity);
 
     void addProducts(List<ProductEntity> productEntity);
 
@@ -23,9 +23,11 @@ public interface ProductDAO {
 
     List<ProductEntity> updateProducts(List<ProductEntity> productEntity);
 
-    void deleteProduct(Long productId);
+    void deleteProductById(Long productId);
 
-    void deleteProducts(List<Long> productId);
+    void deleteProduct(ProductEntity productEntity);
+
+    void deleteProductsById(List<Long> productId);
 
     long getProductsCount();
 
