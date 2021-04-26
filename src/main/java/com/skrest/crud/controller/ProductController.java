@@ -1,6 +1,6 @@
 package com.skrest.crud.controller;
 
-import com.skrest.crud.ProductDAOImpl;
+import com.skrest.crud.dao.ProductDAOImpl;
 import com.skrest.crud.model.ProductEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class ProductController {
     private static final String FAILURE = "FAILURE";
 
     @GetMapping(value = "/product/{productId}", produces = ("application/json; charset=utf-8"))
-    public ResponseEntity<ProductEntity>  getProductInfo(@PathVariable("productId") @Min(value = 1,message = "wtf") Long productId){
+    public ResponseEntity<ProductEntity> getProductById(@PathVariable("productId") @Min(value = 1,message = "wtf") Long productId){
         if(productId == null || productId < 0){
             throw new IllegalArgumentException(environment.getProperty(PRODUCT_NON_NULL_OR_NEGATIVE) + productId);
         }
@@ -45,7 +45,8 @@ public class ProductController {
         try {
             product = productDAOImpl.getProductById(productId);
             if(product == null){
-                throw new NoSuchElementException(environment.getProperty(PRODUCT_NOT_FOUND) + productId);
+                //return ResponseEntity.notFound().build();
+                throw new ResourceNotFoundException(String.format("Product Id %s doesn't exist.", productId));
             }
         }
         catch (Exception e){

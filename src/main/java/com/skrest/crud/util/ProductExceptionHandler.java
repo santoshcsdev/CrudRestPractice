@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
 
 import java.util.NoSuchElementException;
@@ -32,6 +33,12 @@ public class ProductExceptionHandler {
     @ExceptionHandler(value = {ResourceNotFoundException.class})
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException exception){
         LOGGER.error(String.format("Resource Not Found Exception: %s ", exception.getMessage()));
+        return new ResponseEntity<Object>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = {ResponseStatusException.class})
+    public ResponseEntity<Object> handleResourceNotFoundException(ResponseStatusException exception){
+        LOGGER.error(String.format("Not Found Exception: %s ", exception.getMessage()));
         return new ResponseEntity<Object>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 

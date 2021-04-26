@@ -1,4 +1,4 @@
-package com.skrest.crud;
+package com.skrest.crud.dao;
 
 import com.skrest.crud.model.ProductEntity;
 

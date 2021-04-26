@@ -1,22 +1,23 @@
 package com.skrest.crud.controller;
 
-import com.skrest.crud.ProductDAOImpl;
+import com.skrest.crud.dao.ProductDAOImpl;
 import com.skrest.crud.model.ProductEntity;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
@@ -27,6 +28,10 @@ public class ProductControllerTest {
     @InjectMocks
     private ProductController productController;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     @Test
     public void getProductInfoTest_Valid(){
         Long productId = 2L;
@@ -35,7 +40,7 @@ public class ProductControllerTest {
 
         Mockito.when(productDAOImpl.getProductById(productId)).thenReturn(productEntity);
 
-        ResponseEntity<ProductEntity> responseEntity = productController.getProductInfo(productId);
+        ResponseEntity<ProductEntity> responseEntity = productController.getProductById(productId);
         Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         Assertions.assertEquals(productId, Objects.requireNonNull(responseEntity.getBody()).getId());
         Assertions.assertEquals(productEntity.getName(), Objects.requireNonNull(responseEntity.getBody()).getName());
@@ -53,7 +58,7 @@ public class ProductControllerTest {
         Mockito.when(productDAOImpl.getProductById(productId)).thenReturn(productEntity);
 
         // TODO not sure why it's throwing NullPointerException instead of IllegalArgumentException
-        Assertions.assertThrows(NullPointerException.class, ()->productController.getProductInfo(productId));
+        Assertions.assertThrows(NullPointerException.class, ()->productController.getProductById(productId));
     }
 
     @Test
@@ -87,6 +92,15 @@ public class ProductControllerTest {
         Assertions.assertEquals(String.format("Product added with Id: %s", productEntity.getId()),
                 responseEntity.getBody());
 
+    }
+
+    @Test
+    public void consumeAnotherRestApiTest(){
+        final String uri = "https://quoters.apps.pcfone.io/api/random";
+
+        //RestTemplate restTemplate = new RestTemplate();
+        String result = restTemplate.getForObject(uri, String.class);
+        System.out.println(result);
     }
 
     private ProductEntity getProductEntity(Long id, String name, double price, String currencyCode, String description){
