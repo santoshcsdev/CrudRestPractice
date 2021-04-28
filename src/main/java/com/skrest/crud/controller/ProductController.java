@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @Validated
 @PropertySource(value = { "classpath:validation_message.properties" })
 public class ProductController {
